@@ -57,6 +57,7 @@
 #include "utils/datetime.h"
 #include "miscadmin.h"
 #include "proto/pg_logicaldec.pb-c.h"
+#include "access/tuptoaster.h"
 
 #ifdef WITH_POSTGIS
 /* POSTGIS version define so it doesn't redef macros */
@@ -580,6 +581,7 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
   for (natt = 0; natt < tupdesc->natts; natt++) {
     Form_pg_attribute attr;
     Datum origval;
+    Datum result;
     bool isnull;
 
     attr = tupdesc->attrs[natt];
@@ -627,14 +629,13 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     getTypeOutputInfo(attr->atttypid, &typoutput, &typisvarlena);
     if (!isnull) {
       if (typisvarlena && VARATT_IS_EXTERNAL_ONDISK(origval)) {
-        datum_msg.datum_unchanged = true;
-        datum_msg.datum_case = DECODERBUFS__DATUM_MESSAGE__DATUM_DATUM_UNCHANGED;
+        result = heap_tuple_untoast_attr(origval);
       } else if (!typisvarlena) {
-        set_datum_value(&datum_msg, attr->atttypid, typoutput, origval);
+        result = origval;
       } else {
-        Datum val = PointerGetDatum(PG_DETOAST_DATUM(origval));
-        set_datum_value(&datum_msg, attr->atttypid, typoutput, val);
+        result = PointerGetDatum(PG_DETOAST_DATUM(origval));
       }
+      set_datum_value(&datum_msg, attr->atttypid, typoutput, result);
     }
 
     tmsg[i] = palloc(sizeof(datum_msg));

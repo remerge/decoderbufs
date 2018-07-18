@@ -31,6 +31,7 @@ message DatumMessage {
 
 message RowMessage {
 	uint32 transaction_id = 1;
+	uint32 primary_key_id = 8;
 	uint64 log_position = 7;
 	uint64 commit_time = 2;
 	string table = 3;

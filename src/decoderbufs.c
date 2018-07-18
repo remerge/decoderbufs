@@ -322,6 +322,9 @@ static void print_row_msg(StringInfo out, Decoderbufs__RowMessage *rmsg) {
   if (rmsg->has_transaction_id)
     appendStringInfo(out, "txid[%d]", rmsg->transaction_id);
 
+  if (rmsg->has_primary_key_id)
+    appendStringInfo(out, "primary_key_id[%d]", rmsg->primary_key_id);
+
   if (rmsg->has_log_position)
     appendStringInfo(out, ", lsn[%ld]", rmsg->log_position);
 
@@ -650,6 +653,8 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
   /* set common fields */
   rmsg.transaction_id = txn->xid;
   rmsg.has_transaction_id = true;
+  rmsg.primary_key_id  = relation->rd_pkindex;
+  rmsg.has_primary_key_id = true;
   rmsg.log_position = txn->end_lsn;
   rmsg.has_log_position = true;
   rmsg.commit_time = TIMESTAMPTZ_TO_USEC_SINCE_EPOCH(txn->commit_time);

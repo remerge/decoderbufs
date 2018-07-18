@@ -355,7 +355,7 @@ const ProtobufCMessageDescriptor decoderbufs__datum_message__descriptor =
   (ProtobufCMessageInit) decoderbufs__datum_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor decoderbufs__row_message__field_descriptors[7] =
+static const ProtobufCFieldDescriptor decoderbufs__row_message__field_descriptors[8] =
 {
   {
     "transaction_id",
@@ -441,6 +441,18 @@ static const ProtobufCFieldDescriptor decoderbufs__row_message__field_descriptor
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "primary_key_id",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Decoderbufs__RowMessage, has_primary_key_id),
+    offsetof(Decoderbufs__RowMessage, primary_key_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned decoderbufs__row_message__field_indices_by_name[] = {
   1,   /* field[1] = commit_time */
@@ -448,13 +460,14 @@ static const unsigned decoderbufs__row_message__field_indices_by_name[] = {
   4,   /* field[4] = new_tuple */
   5,   /* field[5] = old_tuple */
   3,   /* field[3] = op */
+  7,   /* field[7] = primary_key_id */
   2,   /* field[2] = table */
   0,   /* field[0] = transaction_id */
 };
 static const ProtobufCIntRange decoderbufs__row_message__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 7 }
+  { 0, 8 }
 };
 const ProtobufCMessageDescriptor decoderbufs__row_message__descriptor =
 {
@@ -464,7 +477,7 @@ const ProtobufCMessageDescriptor decoderbufs__row_message__descriptor =
   "Decoderbufs__RowMessage",
   "decoderbufs",
   sizeof(Decoderbufs__RowMessage),
-  7,
+  8,
   decoderbufs__row_message__field_descriptors,
   decoderbufs__row_message__field_indices_by_name,
   1,  decoderbufs__row_message__number_ranges,

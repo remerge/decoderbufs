@@ -17,8 +17,8 @@ RUN apt-get update -qq \
   && apt-get install -y --force-yes postgresql-server-dev-9.6 \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p build
-ADD ./ build
-WORKDIR build
+RUN mkdir -p /build
+ADD ./ /build
+WORKDIR /build
 
 RUN make proto && make && make install

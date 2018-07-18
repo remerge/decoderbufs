@@ -651,10 +651,13 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
                            !OidIsValid(relation->rd_replidindex)));
 
   /* set common fields */
+  // set primary key only if it exists for the table
+  if (!is_rel_non_selective) {
+    rmsg.primary_key_id  = relation->rd_replidindex;
+    rmsg.has_primary_key_id = true;
+  }
   rmsg.transaction_id = txn->xid;
   rmsg.has_transaction_id = true;
-  rmsg.primary_key_id  = relation->rd_pkindex;
-  rmsg.has_primary_key_id = true;
   rmsg.log_position = txn->end_lsn;
   rmsg.has_log_position = true;
   rmsg.commit_time = TIMESTAMPTZ_TO_USEC_SINCE_EPOCH(txn->commit_time);

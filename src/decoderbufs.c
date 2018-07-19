@@ -653,7 +653,17 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
   /* set common fields */
   // set primary key only if it exists for the table
   if (!is_rel_non_selective) {
-    rmsg.primary_key_id  = relation->rd_replidindex;
+    int key;
+    uint32_t key_id = 0;
+    Relation indexRel = index_open(relation->rd_replidindex, ShareLock);
+    for (key = 0; key < indexRel->rd_index->indnatts; key++)
+    {
+        int relattr = indexRel->rd_index->indkey.values[key - 1];
+        key_id |= 1UL << relattr;
+    }
+    index_close(indexRel, NoLock);
+
+    rmsg.primary_key_id  = key_id;
     rmsg.has_primary_key_id = true;
   }
   rmsg.transaction_id = txn->xid;

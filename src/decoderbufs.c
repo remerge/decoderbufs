@@ -655,8 +655,10 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 
   /* set common fields */
   // set primary key only if it exists for the table
+  int MAX_COLUMNS = 1024;
 
-  bool *key_id = palloc(sizeof(100) * sizeof(bool));
+  bool *key_id = palloc(sizeof(MAX_COLUMNS) * sizeof(bool));
+  memset(key_id, 0, sizeof(MAX_COLUMNS) * sizeof(bool));
   if (!is_rel_non_selective) {
     int key;
     Relation indexRel = index_open(relation->rd_replidindex, ShareLock);
@@ -728,6 +730,8 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
       Assert(0);
       break;
   }
+
+  pfree(key_id);
 
   /* write msg */
   OutputPluginPrepareWrite(ctx, true);

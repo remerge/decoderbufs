@@ -596,23 +596,23 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     datum_msg.column_name = NameStr(attr->attname);
 
     /* set is indxed */
-    if (indexT != NULL) {
-      int		j;
-			bool	found_col = false;
+      if (indexT != NULL) {
+        int		j;
+        bool	found_col = false;
 
-			for (j = 0; j < indexT->natts; j++)
-			{
-				Form_pg_attribute	iattr = indexT->attrs[j];
+        for (j = 0; j < indexT->natts; j++)
+        {
+          Form_pg_attribute	iattr = indexT->attrs[j];
 
-				if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
-					found_col = true;
-					break;
-				}
-			}
+          if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
+            found_col = true;
+            break;
+          }
+        }
 
-			datum_msg.is_pk_indexed = found_col;
-			datum_msg.has_is_pk_indexed = true;
-		}
+        datum_msg.is_pk_indexed = found_col;
+        datum_msg.has_is_pk_indexed = true;
+    }
 
     /* set datum from tuple */
     origval = heap_getattr(tuple, natt + 1, tupdesc, &isnull);

@@ -602,24 +602,17 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
 
 			for (j = 0; j < indexT->natts; j++)
 			{
-				Form_pg_attribute	iattr;
-
-				/* See explanation a few lines above. */
-#if (PG_VERSION_NUM >= 90600 && PG_VERSION_NUM < 90605) || (PG_VERSION_NUM >= 90500 && PG_VERSION_NUM < 90509) || (PG_VERSION_NUM >= 90400 && PG_VERSION_NUM < 90414)
-				iattr = indexT->attrs[j];
-#else
-				iattr = TupleDescAttr(indexT, j);
-#endif
+				Form_pg_attribute	iattr = indexT->attrs[j];
 
 				if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
 					found_col = true;
-          break;
-        }
-      }
+					break;
+				}
+			}
 
-      datum_msg.is_pk_indexed = found_col;
-      datum_msg.has_is_pk_indexed = true;
-    }
+			datum_msg.is_pk_indexed = found_col;
+			datum_msg.has_is_pk_indexed = true;
+		}
 
     /* set datum from tuple */
     origval = heap_getattr(tuple, natt + 1, tupdesc, &isnull);
@@ -744,7 +737,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
   }
 
   if (indexT != NULL) {
-    index_close(indexRel, NoLock); 
+    index_close(indexRel, NoLock);
   }
 
   /* write msg */

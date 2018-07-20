@@ -662,7 +662,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
     Relation indexRel = index_open(relation->rd_replidindex, ShareLock);
     for (key = 0; key < indexRel->rd_index->indnatts; key++)
     {
-        int relattr = indexRel->rd_index->indkey.values[key - 1];
+        int relattr = indexRel->rd_index->indkey.values[key];
         key_id[relattr] = true;
     }
     index_close(indexRel, NoLock);

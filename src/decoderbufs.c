@@ -596,8 +596,10 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     datum_msg.column_name = NameStr(attr->attname);
 
     /* set is indxed */
-    datum_msg.is_pk_indexed = key_id[natt];
-    datum_msg.has_is_pk_indexed = true;
+    if (key_id != NULL) {
+      datum_msg.is_pk_indexed = key_id[natt];
+      datum_msg.has_is_pk_indexed = true;
+    }
 
     /* set datum from tuple */
     origval = heap_getattr(tuple, natt + 1, tupdesc, &isnull);
@@ -697,7 +699,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
           rmsg.old_tuple =
               palloc(sizeof(Decoderbufs__DatumMessage*) * tupdesc->natts);
           rmsg.n_old_tuple -= tuple_to_tuple_msg(rmsg.old_tuple, relation,
-                             &change->data.tp.oldtuple->tuple, tupdesc, key_id);
+                             &change->data.tp.oldtuple->tuple, tupdesc, NULL);
         }
         if (change->data.tp.newtuple != NULL) {
           TupleDesc tupdesc = RelationGetDescr(relation);
@@ -719,7 +721,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
         rmsg.old_tuple =
             palloc(sizeof(Decoderbufs__DatumMessage*) * tupdesc->natts);
         rmsg.n_old_tuple -= tuple_to_tuple_msg(rmsg.old_tuple, relation,
-                           &change->data.tp.oldtuple->tuple, tupdesc, key_id);
+                           &change->data.tp.oldtuple->tuple, tupdesc, NULL);
       }
       break;
     default:

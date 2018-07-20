@@ -13,7 +13,7 @@ Version: 0.1.0
 
 **Shoutouts:**
 - [The PostgreSQL Team](https://postgresql.org) for adding [logical decoding](http://www.postgresql.org/docs/9.4/static/logicaldecoding.html) support. This is a immensely useful feature.
-- [Michael Paquier](https://github.com/michaelpq) for his [decoder_raw](https://github.com/michaelpq/pg_plugins/tree/master/decoder_raw) 
+- [Michael Paquier](https://github.com/michaelpq) for his [decoder_raw](https://github.com/michaelpq/pg_plugins/tree/master/decoder_raw)
 project and blog posts as a guide to teach myself how to write a PostgreSQL logical decoder output plugin.
 - [Martin Kleppmann](https://github.com/ept) for making me aware that PostgreSQL was working on logical decoding.
 - [Magnus Edenhill](https://github.com/edenhill) for letting me know that protobuf-c existed and just in general for writing librdkafka.

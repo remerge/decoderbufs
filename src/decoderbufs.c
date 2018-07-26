@@ -571,7 +571,7 @@ static void set_datum_value(Decoderbufs__DatumMessage *datum_msg, Oid typid,
 /* convert a PG tuple to an array of DatumMessage(s) */
 static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
                                Relation relation, HeapTuple tuple,
-                               TupleDesc tupdesc, TupleDesc indexT) {
+                               TupleDesc tupdesc, TupleDesc index_tupledesc) {
   int natt;
   int skipped = 0;
   int i = 0;
@@ -595,23 +595,23 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     /* set the column name */
     datum_msg.column_name = NameStr(attr->attname);
 
-    /* set is indxed */
-      if (indexT != NULL) {
-        int		j;
-        bool	found_col = false;
+    /* check if this attr is part of the index */
+    if (index_tupledesc != NULL) {
+      int j;
+      bool is_indexed = false;
 
-        for (j = 0; j < indexT->natts; j++)
-        {
-          Form_pg_attribute	iattr = indexT->attrs[j];
+      for (j = 0; j < index_tupledesc->natts; j++)
+      {
+        Form_pg_attribute	iattr = index_tupledesc->attrs[j];
 
-          if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
-            found_col = true;
-            break;
-          }
+        if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
+          is_indexed = true;
+          break;
         }
+      }
 
-        datum_msg.is_pk_indexed = found_col;
-        datum_msg.has_is_pk_indexed = true;
+      datum_msg.is_primary_key = is_indexed;
+      datum_msg.has_is_primary_key = true;
     }
 
     /* set datum from tuple */
@@ -668,11 +668,11 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 
   /* set common fields */
   // set primary key only if it exists for the table
-  TupleDesc indexT = NULL;
-  Relation indexRel;
+  TupleDesc index_tupdesc = NULL;
+  Relation index_rel = NULL;
   if (!is_rel_non_selective) {
-    indexRel = index_open(relation->rd_replidindex, ShareLock);
-    indexT = RelationGetDescr(indexRel);
+    index_rel = index_open(relation->rd_replidindex, ShareLock);
+    index_tupdesc = RelationGetDescr(index_rel);
   }
   rmsg.transaction_id = txn->xid;
   rmsg.has_transaction_id = true;
@@ -693,7 +693,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
         rmsg.new_tuple =
             palloc(sizeof(Decoderbufs__DatumMessage*) * tupdesc->natts);
         rmsg.n_new_tuple -= tuple_to_tuple_msg(rmsg.new_tuple, relation,
-                           &change->data.tp.newtuple->tuple, tupdesc, indexT);
+                           &change->data.tp.newtuple->tuple, tupdesc, index_tupdesc);
       }
       break;
     case REORDER_BUFFER_CHANGE_UPDATE:
@@ -714,7 +714,7 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
           rmsg.new_tuple =
               palloc(sizeof(Decoderbufs__DatumMessage*) * tupdesc->natts);
           rmsg.n_new_tuple -= tuple_to_tuple_msg(rmsg.new_tuple, relation,
-                             &change->data.tp.newtuple->tuple, tupdesc, indexT);
+                             &change->data.tp.newtuple->tuple, tupdesc, index_tupdesc);
         }
       }
       break;
@@ -736,8 +736,8 @@ static void pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
       break;
   }
 
-  if (indexT != NULL) {
-    index_close(indexRel, NoLock);
+  if (index_rel != NULL) {
+    index_close(index_rel, NoLock);
   }
 
   /* write msg */

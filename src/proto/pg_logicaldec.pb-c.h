@@ -63,8 +63,8 @@ struct  _Decoderbufs__DatumMessage
   char *column_name;
   protobuf_c_boolean has_column_type;
   int64_t column_type;
-  protobuf_c_boolean has_is_pk_indexed;
-  protobuf_c_boolean is_pk_indexed;
+  protobuf_c_boolean has_is_primary_key;
+  protobuf_c_boolean is_primary_key;
   Decoderbufs__DatumMessage__DatumCase datum_case;
   union {
     int32_t datum_int32;

@@ -414,6 +414,9 @@ static void set_datum_value(Decoderbufs__DatumMessage *datum_msg, Oid typid,
   Point *p = NULL;
   int size = 0;
 
+  elog(WARNING, "Hi there it is a test");
+  elog(WARNING, "typid is %d", typid);
+
   switch (typid) {
     case BOOLOID:
       datum_msg->datum_bool = DatumGetBool(datum);

@@ -581,7 +581,6 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
   for (natt = 0; natt < tupdesc->natts; natt++) {
     Form_pg_attribute attr;
     Datum origval;
-    Datum result;
     bool isnull;
 
     attr = tupdesc->attrs[natt];
@@ -626,10 +625,11 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     Oid typoutput;
     bool typisvarlena;
     /* query output function */
+    Datum result;
     getTypeOutputInfo(attr->atttypid, &typoutput, &typisvarlena);
     if (!isnull) {
       if (typisvarlena && VARATT_IS_EXTERNAL_ONDISK(origval)) {
-        result = heap_tuple_untoast_attr(origval);
+        result = PointerGetDatum(heap_tuple_fetch_attr((struct varlena *)origval));
       } else if (!typisvarlena) {
         result = origval;
       } else {

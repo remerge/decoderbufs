@@ -607,7 +607,7 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
 
       for (j = 0; j < index_tupledesc->natts; j++)
       {
-        Form_pg_attribute	iattr = index_tupledesc->attrs[j];
+        Form_pg_attribute	iattr = TupleDescAttr(index_tupledesc,attrs[j]);
 
         if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
           is_indexed = true;

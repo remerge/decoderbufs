@@ -123,9 +123,14 @@ static void pg_decode_startup(LogicalDecodingContext *ctx,
   DecoderData *data;
 
   data = palloc(sizeof(DecoderData));
+#if PG_VERSION_NUM >= 90600
+  data->context = AllocSetContextCreate(
+      ctx->context, "decoderbufs context", ALLOCSET_DEFAULT_SIZES);
+#else
   data->context = AllocSetContextCreate(
       ctx->context, "decoderbufs context", ALLOCSET_DEFAULT_MINSIZE,
       ALLOCSET_DEFAULT_INITSIZE, ALLOCSET_DEFAULT_MAXSIZE);
+#endif
   data->debug_mode = false;
   opt->output_type = OUTPUT_PLUGIN_BINARY_OUTPUT;
 
@@ -582,7 +587,7 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
     Datum origval;
     bool isnull;
 
-    attr = tupdesc->attrs[natt];
+    attr = TupleDescAttr(tupdesc, natt);
 
     /* skip dropped columns and system columns */
     if (attr->attisdropped || attr->attnum < 0) {
@@ -602,7 +607,7 @@ static int tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
 
       for (j = 0; j < index_tupledesc->natts; j++)
       {
-        Form_pg_attribute	iattr = index_tupledesc->attrs[j];
+        Form_pg_attribute	iattr = TupleDescAttr(index_tupledesc,j);
 
         if (strcmp(NameStr(attr->attname), NameStr(iattr->attname)) == 0) {
           is_indexed = true;
